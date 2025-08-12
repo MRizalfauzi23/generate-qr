@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QR Batch Generator</title>
+  <style>
+    /* Reset dan font */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 40px;
+      background: #f0f3f7;
+      color: #333;
+    }
+    /* Container card */
+    .card {
+      background: #fff;
+      padding: 32px 28px;
+      border-radius: 12px;
+      max-width: 720px;
+      margin: 0 auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      transition: box-shadow 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+    }
+    /* Judul */
+    h1 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #0b74de;
+      letter-spacing: 0.03em;
+    }
+    /* Catatan kecil */
+    .note {
+      font-size: 0.875rem;
+      color: #6b7280; /* abu abu kalem */
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    /* Label */
+    label {
+      display: block;
+      margin-top: 24px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #374151;
+    }
+    /* Input dan select */
+    input[type="text"],
+    input[type="file"],
+    select {
+      width: 100%;
+      padding: 14px 16px;
+      margin-top: 8px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.25s ease;
+      box-sizing: border-box;
+    }
+    input[type="text"]:focus,
+    input[type="file"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #0b74de;
+      box-shadow: 0 0 6px rgba(11,116,222,0.3);
+    }
+    /* Tombol */
+    button {
+      margin-top: 32px;
+      width: 100%;
+      padding: 14px 0;
+      border-radius: 12px;
+      border: none;
+      background: #0b74de;
+      color: white;
+      font-weight: 700;
+      font-size: 1.125rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(11,116,222,0.4);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #065bb5;
+      box-shadow: 0 6px 20px rgba(6,91,181,0.6);
+    }
+    button:active {
+      background-color: #044a8c;
+      box-shadow: 0 2px 8px rgba(4,74,140,0.8);
+    }
+    /* Alert messages */
+    .alert {
+      padding: 14px 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+    .alert-icon {
+      font-size: 1.3rem;
+    }
+    .alert.danger {
+      background: #fdecea;
+      color: #b91c1c;
+    }
+    .alert.warning {
+      background: #fef3c7;
+      color: #78350f;
+    }
+    .alert.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>QR Generator Edulink</h1>
+    <p class="note">
+      Upload file Excel (.xls / .xlsx). Script akan baca header pada baris ke-3 (header=2). <strong>Pastikan Format Excel 97-2003 workbook ya gess!!</strong> kolom Harus ada: <strong>Nama Peserta</strong>, <strong>QR-Code</strong>, <strong>Kelas</strong>.
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+        <div class="alert {{ cat }}">
+          <span class="alert-icon">
+            {% if cat == 'danger' %}&#9888;{% elif cat == 'warning' %}&#x26A0;{% else %}&#10003;{% endif %}
+          </span>
+          <div class="alert-content">
+            <strong>
+              {% if cat == 'danger' %}Gagal:{% elif cat == 'warning' %}Perhatian:{% else %}Sukses:{% endif %}
+            </strong>
+            {{ msg }}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="post" enctype="multipart/form-data">
+      <label for="excel_file">File Excel</label>
+      <input type="file" id="excel_file" name="excel_file" accept=".xls,.xlsx" required>
+
+      <label for="output_name">Nama folder output (opsional)</label>
+      <input type="text" id="output_name" name="output_name" placeholder="QR CODE FOLDER">
+
+      <label for="compress">Format kompresi</label>
+      <select id="compress" name="compress">
+        <option value="zip" selected>ZIP (direkomendasikan)</option>
+        <option value="rar">RAR {% if not rar_available %}(tidak tersedia di server){% endif %}</option>
+      </select>
+
+      <button type="submit">Generate &amp; Download</button>
+    </form>
+
+    <p class="note">
+      Catatan: Jika memilih RAR, server harus punya WinRAR/rar.exe atau support <code>rarfile</code>. Kalau tidak, sistem akan fallback ke ZIP.
+    </p>
+  </div>
+</body>
+</html>
